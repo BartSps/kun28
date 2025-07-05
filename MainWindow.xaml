@@ -1,0 +1,92 @@
+﻿<Window x:Class="kun28.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:kun28"
+        xmlns:mv="clr-namespace;kun28.MainWindow"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="#454548" 
+        Topmost="True"
+        ShowInTaskbar="False"
+        Top="5"
+        mc:Ignorable="d"
+        WindowStartupLocation="Manual"
+        Title="困28" Height="24" Width="228">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary/CButton.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <local:StatusBoolConverter x:Key="statusBoolConveter"/>
+            <local:EnabledImageSourceConverter x:Key="enabledImaeSourceConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel.Resources>
+
+            </StackPanel.Resources>
+            <Button Style="{StaticResource CButton}" 
+                    PreviewMouseLeftButtonDown="DragButton_PreviewMouseLeftButtonDown"
+                    PreviewMouseMove="DragButton_PreviewMouseMove"
+                    PreviewMouseLeftButtonUp="DragButton_PreviewMouseLeftButtonUp"
+                    Width="16" Padding="0">
+                <Button.Content>
+                    <Image Source="{Binding IsEnabled,
+                        RelativeSource={RelativeSource AncestorType=Button,AncestorLevel=1,Mode=FindAncestor},
+                        Converter={StaticResource enabledImaeSourceConverter},ConverterParameter=drag}"/>
+                </Button.Content>
+            </Button>
+            <Button Style="{StaticResource CButton}" Click="Start" IsEnabled="{Binding Status,ConverterParameter=1,Converter={StaticResource statusBoolConveter}}">
+                <Button.Content>
+                    <Image Source="{Binding IsEnabled,
+                        RelativeSource={RelativeSource AncestorType=Button,AncestorLevel=1,Mode=FindAncestor},
+                        Converter={StaticResource enabledImaeSourceConverter},ConverterParameter=start}"/>
+                </Button.Content>
+            </Button>
+            <Button Style="{StaticResource CButton}" Click="Pause" IsEnabled="{Binding Status,ConverterParameter=2,Converter={StaticResource statusBoolConveter}}">
+                <Button.Content>
+                    <Image Source="{Binding IsEnabled,
+                        RelativeSource={RelativeSource AncestorType=Button,AncestorLevel=1,Mode=FindAncestor},
+                        Converter={StaticResource enabledImaeSourceConverter},ConverterParameter=pause}"/>
+                </Button.Content>
+            </Button>
+            <Button Style="{StaticResource CButton}" Click="Stop" IsEnabled="{Binding Status,ConverterParameter=0,Converter={StaticResource statusBoolConveter}}">
+                <Button.Content>
+                    <Image Source="{Binding IsEnabled,
+                        RelativeSource={RelativeSource AncestorType=Button,AncestorLevel=1,Mode=FindAncestor},
+                        Converter={StaticResource enabledImaeSourceConverter},ConverterParameter=stop}"/>
+                </Button.Content>
+            </Button>
+            <Button Style="{StaticResource CButton}" Click="Exit" IsEnabled="{Binding Status,ConverterParameter=3,Converter={StaticResource statusBoolConveter}}">
+                <Button.Content>
+                    <Image Source="{Binding IsEnabled,
+                        RelativeSource={RelativeSource AncestorType=Button,AncestorLevel=1,Mode=FindAncestor},
+                        Converter={StaticResource enabledImaeSourceConverter},ConverterParameter=exit}"/>
+                </Button.Content>
+            </Button>
+            <Button Style="{StaticResource CButton}" Click="Discre" IsEnabled="{Binding Status,ConverterParameter=3,Converter={StaticResource statusBoolConveter}}">
+                <Button.Content>
+                    <Image Source="{Binding IsEnabled,
+                        RelativeSource={RelativeSource AncestorType=Button,AncestorLevel=1,Mode=FindAncestor},
+                        Converter={StaticResource enabledImaeSourceConverter},ConverterParameter=sub}"/>
+                </Button.Content>
+            </Button>
+            <TextBox Width="30" Height="24" Margin="0" Padding="0"
+                     VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                     Background="#FF838383" Foreground="White"
+                      IsEnabled="{Binding Status,ConverterParameter=3,Converter={StaticResource statusBoolConveter}}"
+                     Text="{Binding Times}"
+                     />
+            <Button Style="{StaticResource CButton}" Click="Incre" IsEnabled="{Binding Status,ConverterParameter=3,Converter={StaticResource statusBoolConveter}}">
+                <Button.Content>
+                    <Image Source="{Binding IsEnabled,
+                        RelativeSource={RelativeSource AncestorType=Button,AncestorLevel=1,Mode=FindAncestor},
+                        Converter={StaticResource enabledImaeSourceConverter},ConverterParameter=add}"/>
+                </Button.Content>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
