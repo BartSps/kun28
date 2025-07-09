@@ -2,38 +2,45 @@
 using kun28.utils;
 using OpenCvSharp;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace kun28.Models
 {
     public class LinkTask
     {
-        public Mat templateMat;
+        [JsonIgnore]
+        public Mat templateMat { get; set; }
+        [JsonIgnore]
+        public LinkTask TN { get; set; }
+        [JsonIgnore]
+        public LinkTask FN { get; set; }
 
-        public LinkTask TN;
+        public int delayBefore { get; set; }
+        [JsonIgnore]
+        public Func<Task<LinkTask>> run { get; set; }
+        [JsonIgnore]
+        public static CustomTaskRunner ctr { get; set; }
 
-        public LinkTask FN;
+        public static string path  = "D:/kun28image/";
 
-        public int delayBefore;
+        public string fileName { get; set; }
 
-        public Func<Task<LinkTask>> run;
+        public int times { get; set; }
 
-        public static CustomTaskRunner ctr;
+        public int offsetX { get; set; }
 
-        public static readonly string path = "D:/kun28image/";
+        public int offsetY { get; set; }
 
-        public string fileName;
+        public bool click { get; set; }
 
-        public int times;
+        public TemplateMatchModes matchMode { get; set; }
 
-        public int offsetX;
-
-        public int offsetY;
-
-        public bool click;
-
-        public TemplateMatchModes matchMode;
-
-        public LinkTask(string fileName, int delayBefore = 1000,int times = 1, LinkTask tN = null, LinkTask fN = null, Func<Task<LinkTask>> run = null,int offsetX = 0,int offsetY = 0,bool click = true,TemplateMatchModes matchMode = TemplateMatchModes.CCoeffNormed)
+        public LinkTask(string fileName,
+            int delayBefore = 1000,int times = 1, LinkTask tN = null,
+            LinkTask fN = null, Func<Task<LinkTask>> run = null,
+            int offsetX = 0,int offsetY = 0,
+            bool click = true,
+            TemplateMatchModes matchMode = TemplateMatchModes.CCoeffNormed)
         {
             this.fileName = fileName;
             if (!fileName.Contains(".")) fileName += ".png";
@@ -52,12 +59,20 @@ namespace kun28.Models
         private async Task<LinkTask> Run()
         {
             bool res = false;
-            await Task.Delay(delayBefore);
+            int delay = delayBefore;
+            while(delay > 0)
+            {
+                await ctr.checkPause();
+                if (ctr.checkCancel()) break;
+                await Task.Delay(100);
+                delay -= 100;
+            }
             int t = times;
             while (t > 0)
             {
                 --t;
-                await Task.Delay(1000);
+                await ctr.checkPause();
+                if (ctr.checkCancel()) break;
                 Point? p;
                 if (!matchMode.Equals(TemplateMatchModes.SqDiffNormed)) p = CVTools.FindGrayImageOnScreen(templateMat);
                 else p = CVTools.FindBySqDiffNormed(templateMat);
@@ -78,9 +93,15 @@ namespace kun28.Models
                     res = true;
                     break;
                 }
+                await Task.Delay(1000);
             }
             return res ? TN : FN;
         }
         
+        public static LinkTask ConverterByParams(TaskParams taskParams)
+        {
+            return new LinkTask(taskParams.fileName, taskParams.delayBefore, taskParams.times,
+                offsetX: taskParams.offsetX, offsetY: taskParams.offsetY, click: taskParams.click, matchMode: taskParams.matchMode);
+        }
     }
 }

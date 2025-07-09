@@ -17,17 +17,23 @@ namespace kun28.utils
                 Cv2.ImShow("end", templateImage);
                 return null;
             }
-            name = x + "," + y;
-            Cv2.ImShow(name, templateImage);
-            x += 50;
-            if (x > 2260)
+            Bitmap screenImage;
+            if (false)
             {
-                x = 0; 
-                y += 30;
+                name = x + "," + y;
+                Cv2.ImShow(name, templateImage);
+                Cv2.MoveWindow(name, x, y);
+                x += 50;
+                if (x > 2260)
+                {
+                    x = 0;
+                    y += 30;
+                }
+                screenImage = ScreenImageUtils.CaptureRegion(new Rectangle(0, 0, 2000, 980));
             }
-            Cv2.MoveWindow(name,x,y);
+            else screenImage = ScreenImageUtils.CaptureScreen();
             // 捕获屏幕
-            using (var screen = ScreenImageUtils.CaptureRegion(new Rectangle(0, 0, 2000, 980)))
+            using (var screen = screenImage)
             using (var screenMat = OpenCvSharp.Extensions.BitmapConverter.ToMat(screen))
             {
                 // 转换为灰度图像
@@ -65,17 +71,22 @@ namespace kun28.utils
                 Cv2.ImShow("end", templateImage);
                 return null;
             }
-            name = x + "," + y;
-            Cv2.ImShow(name, templateImage);
-            x += 50;
-            if (x > 2260)
+            Bitmap screenImage;
+            if (false)
             {
-                x = 0;
-                y += 30;
-            }
-            Cv2.MoveWindow(name, x, y);
+                name = x + "," + y;
+                Cv2.ImShow(name, templateImage);
+                Cv2.MoveWindow(name, x, y);
+                x += 50;
+                if (x > 2260)
+                {
+                    x = 0;
+                    y += 30;
+                }
+                screenImage = ScreenImageUtils.CaptureRegion(new Rectangle(0, 0, 2000, 980));
+            }else screenImage = ScreenImageUtils.CaptureScreen();
             // 捕获屏幕
-            using (var screen = ScreenImageUtils.CaptureRegion(new Rectangle(0, 0, 2000, 980)))
+            using (var screen = screenImage)
             using (var screenMat = OpenCvSharp.Extensions.BitmapConverter.ToMat(screen))
             {
                 // 转换为灰度图像

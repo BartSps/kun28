@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Xml.Serialization;
 using static kun28.utils.HalconUtil;
 using Point = OpenCvSharp.Point;
 using Size = OpenCvSharp.Size;
@@ -29,255 +30,6 @@ namespace kun28
         private static CustomTaskRunner ctr;
 
         private static HTuple hv_ModelID;
-
-        private static readonly CTask tupouTask = new CTask("突破", "D:/kun28image/tansuo_1.png", async () =>
-        {
-
-            Point? p;
-            p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/tupou.png"));
-            Cv2.ImShow("start", new Mat("D:/kun28image/tupou.png"));
-            if (p == null) return true;
-
-            //关闭探索界面
-            p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/close.png"));
-            Cv2.ImShow("start", new Mat("D:/kun28image/close.png"));
-            if (p != null)
-            {
-                await moveAndClick((Point)p);
-                await Task.Delay(1000);
-            }
-
-            //打开结界突破
-            p = null;
-            for (int i = 0; i < 3 && p == null; i++)
-            {
-                p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/tupou1.png"));
-                await Task.Delay(1000);
-            }
-
-            if (p == null) return false;
-            await moveAndClick((Point)p);
-
-            //突破
-            while (true)
-            {
-                await Task.Delay(3000);
-                //选择
-                MatchResult res = matchByGrayTemplate(BitMapToHImage(ScreenImageUtils.CaptureScreen()), hv_ModelID, 0.83F);
-                Cv2.ImShow("start", new Mat("D:/kun28image/weijingong.png"));
-
-                if (res.score > 0)
-                {
-                    await Task.Delay(1000);
-                    await moveAndClick(res.p);
-
-                    //结算1
-                    p = null;
-                    while (p == null)
-                    {
-                        await Task.Delay(1000);
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/jingong.png"));
-                    }
-                    await Task.Delay(1000);
-                    await moveAndClick((Point)p);
-
-                    await Task.Delay(10000);
-                    p = null;
-                    //等待结束
-                    while (p == null)
-                    {
-                        //结算1
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/jieshuang.png"));
-                        //失败
-                        if (p == null)
-                        {
-                            await Task.Delay(1000);
-                            CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/shibai.png"));
-                        }
-                        await ctr?.checkPause();
-                    }
-                    if (p != null)
-                    {
-                        await Task.Delay(1000);
-                        await moveAndClick((Point)p);
-                        //结算2
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/jieshuang.png"));
-                        await Task.Delay(1000);
-                        if (p != null) await moveAndClick((Point)p);
-                    }
-                    continue;
-                }
-                await ctr?.checkPause();
-
-                break;
-            }
-
-            //关闭突破界面
-            p = null;
-            while (p == null)
-            {
-                p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/jieshuang.png"));
-                await Task.Delay(1000);
-            }
-            await moveAndClick((Point)p);
-            await Task.Delay(1000);
-            return true;
-        });
-
-        public List<CTask> tasks = new List<CTask>
-        {
-            new CTask("探索灯笼","D:/kun28image/tansuo_0.png"),
-
-
-            tupouTask,
-
-            new CTask("第二十八章","D:/kun28image/di28zhang.png",async ()=>{
-                Point? p;
-                await Task.Delay(2000);
-
-                //第28章
-                while (true)
-                {
-                    await Task.Delay(3000);
-                    p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/di28zhang.png"));
-                    Cv2.ImShow("start", new Mat("D:/kun28image/di28zhang.png"));
-
-                    if(p == null) break;
-                    await Task.Delay(1000);
-                    await moveAndClick((Point) p);
-                }
-                return true;
-            }),
-
-            new CTask("探索","D:/kun28image/tansuo_1.png",delayBefore:2000,isLoop:true),
-
-
-            new CTask("攻击","D:/kun28image/gongji.png",async ()=>{
-                while(true){
-
-                    //寻找首领按钮
-                    await Task.Delay(1000);
-                    Point? p =CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/shouling.png"));
-
-                    Cv2.ImShow("start", new Mat("D:/kun28image/shouling.png"));
-                    Cv2.ResizeWindow("start", new Size(5, 50));
-
-                    if(p == null)
-                    {
-                        //寻找攻击按钮
-                        await Task.Delay(1000);
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/gongji.png"));
-
-                        Cv2.ImShow("start", new Mat("D:/kun28image/gongji.png"));
-
-                        if(p == null)
-                        {
-                            //向右移动
-                            p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/right.png"));
-
-
-                            Cv2.ImShow("start", new Mat("D:/kun28image/right.png"));
-                            Cv2.ResizeWindow("start", new Size(5, 50));
-
-                            if(p == null) return false;
-                            Point finalP = (Point) p;
-                            finalP.Y -= 60;
-                            await moveAndClick(finalP);
-                            await Task.Delay(2000);
-                            continue;
-                        }
-
-                        await moveAndClick((Point) p);
-                        await Task.Delay(1000);
-
-                        //等待结算
-                        while (true)
-                        {
-                            await Task.Delay(1000);
-
-                             p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/jieshuang.png"));
-                            Cv2.ImShow("start", new Mat("D:/kun28image/jieshuang.png"));
-
-
-                            if(p != null)
-                            {
-                                await Task.Delay(1000);
-                                await moveAndClick((Point) p);
-                                await Task.Delay(1000);
-                                break;
-                            }
-                        }
-                        continue;
-                    }
-
-                    await Task.Delay(1000);
-                    await moveAndClick((Point) p);
-
-                    //等待结算
-                    while (true)
-                    {
-                        await Task.Delay(1000);
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/jieshuang.png"));
-
-                        Cv2.ImShow("start", new Mat("D:/kun28image/jieshuang.png"));
-
-                        if(p != null)
-                        {
-                            await Task.Delay(1500);
-                            await moveAndClick((Point) p);
-                            break;
-                        }
-                    }
-                    //掉落
-                    while (true)
-                    {
-                        await Task.Delay(4000);
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/diaoluo.png"));
-                        Cv2.ImShow("start", new Mat("D:/kun28image/diaoluo.png"));
-
-                        if(p == null) break;
-                        await Task.Delay(1000);
-                        await moveAndClick((Point) p);
-
-                        //点击上方
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/diaoluo2.png"));
-
-                        Cv2.ImShow("start", new Mat("D:/kun28image/diaoluo2.png"));
-
-                        if(p != null)
-                        {
-                            Point dp = (Point) p;
-                            dp.Y -= 200;
-                            await moveAndClick(dp);
-                        }
-
-                    }
-
-                    //宝箱
-                    await Task.Delay(3500);
-                    p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/baoxiang.png"));
-                        Cv2.ImShow("start", new Mat("D:/kun28image/baoxiang.png"));
-
-                    if(p != null)
-                    {
-                        await moveAndClick((Point) p);
-
-
-                        await Task.Delay(2000);
-                        p = CVTools.FindGrayImageOnScreen(new Mat("D:/kun28image/jieshuang.png"));
-
-                        if(p != null)
-                        {
-                            await moveAndClick((Point) p);
-                        }
-                    }
-                    break;
-                }
-                return true;
-            }),
-
-            tupouTask,
-        };
 
         static LinkTask TanSuoDengLong = new LinkTask("tansuo_0");
 
@@ -314,11 +66,71 @@ namespace kun28
         static LinkTask TanSuoClose = new LinkTask("close", tN: TuPo, fN: TuPo);
         static LinkTask TuPoJuan = new LinkTask("tupou", tN: TanSuoClose, fN: Di28Zhang, click: false, matchMode: TemplateMatchModes.SqDiffNormed);
 
-        public static void SaveObject(string path, TestClass linkTask)
-        {
-            string json = JsonSerializer.Serialize(linkTask);
-            File.WriteAllText(path, json);
-        }
+        //static string DATAURL = "run.xml";
+
+        //RunParams runParams;
+
+        //public static bool Debugger = false;
+
+        private LinkTaskCollection data;
+
+        //private LinkTask first;
+
+        private KeyBoardListener _keyboardHook;
+
+        //private int LoadData()
+        //{
+        //    var runParamsSerialize = new XmlSerializer(typeof(RunParams));
+        //    var serialize = new XmlSerializer(typeof(LinkTaskCollection));
+        //    int count = 0;
+            
+        //    using (StreamReader reader = new StreamReader(DATAURL))
+        //    {
+        //        try
+        //        {
+        //            runParams = (RunParams)runParamsSerialize.Deserialize(reader);
+        //            reader.Close();
+        //            reader.Dispose();
+        //            Debugger = runParams.DeBugger;
+
+        //            using (StreamReader taskDataReader = new StreamReader(runParams.TaskDataURL)) {
+        //                data = (LinkTaskCollection)serialize.Deserialize(taskDataReader);
+        //                taskDataReader.Close();
+        //                taskDataReader.Dispose();
+
+        //                LinkTask.path = data.ImageURL;
+        //                Dictionary<string, LinkTask> linkTaskMap = new Dictionary<string, LinkTask>(data.TaskParamsList.Count);
+
+        //                data.TaskParamsList.ForEach(t =>
+        //                {
+        //                    if (linkTaskMap.ContainsKey(t.taskName))
+        //                    {
+        //                        MessageBox.Show("加载数据时检测到taskName重复");
+        //                        count = -1;
+        //                    }
+        //                    linkTaskMap.Add(t.taskName, LinkTask.ConverterByParams(t));
+        //                });
+
+        //                data.TaskParamsList.ForEach(t =>
+        //                {
+        //                    if (linkTaskMap.ContainsKey(t.TN))
+        //                        linkTaskMap[t.taskName].TN = linkTaskMap[t.TN];
+        //                    if (linkTaskMap.ContainsKey(t.FN))
+        //                        linkTaskMap[t.taskName].FN = linkTaskMap[t.FN];
+        //                });
+
+        //                first = linkTaskMap[data.TaskParamsList[0].taskName];
+
+        //                return count == 0 ? data.TaskParamsList.Count : -1; 
+        //            }
+        //        }
+        //        catch(InvalidOperationException e)
+        //        {
+        //            MessageBox.Show("数据加载异常 :" + e.Message);
+        //        }
+        //        return -1;
+        //    }
+        //}
 
         public MainWindow()
         {
@@ -327,17 +139,68 @@ namespace kun28
             Left = SystemParameters.PrimaryScreenWidth - Width - 3;
             DataContext = vm;
 
-            HOperatorSet.ReadShapeModel("D:/kun28image/tupotemplate.shm", out hv_ModelID);
+            //int count = LoadData();
+
+            //if (count < 1)
+            //{
+            //    if(count == 0)
+            //        MessageBox.Show("读取到数据为空");
+            //    Close();
+            //    return;
+            //}
+
+            //if (Debugger) MessageBox.Show("测试模式：请将目标窗口放在 0, 0, 2000, 980 范围内");
+
+
+            _keyboardHook = new KeyBoardListener();
+            _keyboardHook.KeyPressed += (sender, args) =>
+            {
+                //Ctrl + K + R
+                if (args.Key == Key.R && Keyboard.IsKeyDown(Key.K) && Keyboard.IsKeyDown(Key.LeftCtrl))
+                {
+                    if (vm.Status == MainViewModel.STOP)
+                    {
+                        if (vm.Times > 0) run();
+                    }
+                    else if(vm.Status == MainViewModel.PAUSE)
+                        ctr?.Resume();
+                    if (vm.Times > 0) vm.Status = MainViewModel.START;
+                }
+
+                //Ctrl + K + P
+                if (args.Key == Key.P && Keyboard.IsKeyDown(Key.K) && Keyboard.IsKeyDown(Key.LeftCtrl))
+                {
+                    if (vm.Status == MainViewModel.START)
+                    {
+                        ctr?.Pause();
+                        vm.Status = MainViewModel.PAUSE;
+                    }
+                }
+
+                //Ctrl + K + X
+                if (args.Key == Key.X && Keyboard.IsKeyDown(Key.K) && Keyboard.IsKeyDown(Key.LeftCtrl))
+                {
+                    if (vm.Status == MainViewModel.START || vm.Status == MainViewModel.PAUSE)
+                    {
+                        vm.Status = MainViewModel.STOP;
+                        ctr?.Stop();
+                    }
+                }
+
+            };
+
+            HOperatorSet.ReadShapeModel("D:/kun28image/tupoTemplate.shm", out hv_ModelID);
 
             DiaoLuoJieShuang.TN = DiaoLuo;
             RightMove.TN = ShouLing;
             RightMove.FN = TanSuoDengLong;
             GongjiJieShuang.TN = ShouLing;
 
-            XuanZhe.run = async ()=>{
+            XuanZhe.run = async () =>
+            {
                 await Task.Delay(3000);
-                MatchResult res =  matchByGrayTemplate(BitMapToHImage(ScreenImageUtils.CaptureScreen()), hv_ModelID, 0.5F);
-                if(res.score > 0)
+                MatchResult res = matchByGrayTemplate(BitMapToHImage(ScreenImageUtils.CaptureScreen()), hv_ModelID, 0.5F);
+                if (res.score > 0)
                 {
                     await MouseControlUtils.moveAndClick(res.p);
                     return JinGong;
@@ -360,18 +223,11 @@ namespace kun28
             //开始
             TanSuoDengLong.TN = TuPoJuan;
             TanSuoDengLong.FN = TuPoJuan;
-
-            //string s = JsonConvert.SerializeObject(TanSuoDengLong);
-            //MessageBox.Show(s);
-            //LinkTask SLT = JsonConvert.DeserializeObject<LinkTask>(s);
-            //MessageBox.Show(SLT.fileName);
-
-            SaveObject("D:/test/serializer.txt",new TestClass() { name = "test"});
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            hv_ModelID.Dispose();
+            hv_ModelID?.Dispose();
             base.OnClosing(e);
         }
 
@@ -385,27 +241,18 @@ namespace kun28
 
         private async Task run()
         {
-            //Point? p = CVTools.FindBySqDiffNormed(new Mat("D:/kun28image/tupou.png"));
-
-
-            //if (p != null)
-            //{
-            //    Point P = (Point)p;
-            //    MouseControlUtils.MoveTo(P.X, P.Y);
-            //    MessageBox.Show(P.X + " " + P.Y);
-            //}
-
             ctr = new CustomTaskRunner();
 
             LinkTask.ctr = ctr;
 
             while (vm.Times > 0)
             {
+                LinkTask start = await TanSuoDengLong.run();
                 await ctr.checkPause();
                 if (ctr.checkCancel()) break;
-                LinkTask start = await TanSuoDengLong.run();
-                while (!start.fileName.Equals("tansuo_0"))
+                while (! (start == TanSuoDengLong))
                 {
+                    if (start == null) break;
                     await ctr.checkPause();
                     if (ctr.checkCancel()) break;
                     start = await start.run();
@@ -415,6 +262,8 @@ namespace kun28
                 CVTools.init();
                 await Task.Delay(3000);
             }
+
+            //if (Debugger) Cv2.DestroyAllWindows();
 
             ctr.Stop();
             ctr.release();
@@ -443,14 +292,21 @@ namespace kun28
 
         private void Pause(object sender, RoutedEventArgs e)
         {
-            vm.Status = MainViewModel.PAUSE;
-            ctr?.Pause();
+            if (vm.Status == MainViewModel.START)
+            {
+                ctr?.Pause();
+                vm.Status = MainViewModel.PAUSE;
+            }
         }
 
         private void Stop(object sender, RoutedEventArgs e)
         {
-            vm.Status = MainViewModel.STOP;
-            ctr?.Stop();
+            if(vm.Status == MainViewModel.START || vm.Status == MainViewModel.PAUSE)
+            {
+                //vm.Times = 0;
+                vm.Status = MainViewModel.STOP;
+                ctr?.Stop();
+            }
         }
 
         private void Exit(object sender,RoutedEventArgs e)
@@ -543,10 +399,10 @@ namespace kun28
             throw new NotImplementedException();
         }
     }
+
     public class TestClass
     {
         public string name { set; get; }
     }
-
 
 }
